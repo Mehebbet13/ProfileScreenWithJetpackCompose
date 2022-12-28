@@ -1,5 +1,6 @@
 # ProfileScreenWithJetpackCompose
-Simple profile screen created with jetpack compose \n
+Simple profile screen created with jetpack compose 
+
 Screen has animated view and bottomsheet
 ![profile scr](https://user-images.githubusercontent.com/60699592/209802774-2ccb17e9-7e50-42b0-8417-66a413a81a27.png)
 
