@@ -1,6 +1,5 @@
 package com.example.profileapp
 
-import android.graphics.Paint.Style
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,10 +20,16 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ExperimentalMotionApi
+import androidx.constraintlayout.compose.MotionLayout
+import androidx.constraintlayout.compose.MotionScene
+import androidx.constraintlayout.compose.layoutId
+import com.example.profileapp.extension.currentFraction
 import com.example.profileapp.model.Profile
 import com.example.profileapp.ui.theme.Blue
 import com.example.profileapp.ui.theme.Green
@@ -48,6 +53,9 @@ class MainActivity : ComponentActivity() {
                     ),
                     color = Color.Transparent
                 ) {
+                    var progress by remember {
+                        mutableStateOf(0f)
+                    }
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.SpaceBetween
@@ -58,10 +66,11 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.padding(PaddingValues(top = 20.dp))
 
                         ) {
-                            AvatarAndName(
+                            ProfileHeader(
                                 "${profile.firstName} ${profile.lastName}",
                                 profile.avatarUrl,
-                                checkAdmin()
+                                checkAdmin(),
+                                progress
                             )
                         }
 
@@ -69,7 +78,24 @@ class MainActivity : ComponentActivity() {
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
-                            BottomSheet()
+                            val sheetState = rememberBottomSheetState(
+                                initialValue = BottomSheetValue.Collapsed
+                            )
+                            val scaffoldState = rememberBottomSheetScaffoldState(
+                                bottomSheetState = sheetState
+                            )
+                            progress = scaffoldState.currentFraction
+                            BottomSheetScaffold(
+                                scaffoldState = scaffoldState,
+                                sheetContent = {
+                                    MoreInfoCard()
+                                },
+                                sheetBackgroundColor = Color.Transparent,
+                                sheetElevation = (-1).dp,
+                                backgroundColor = Color.Transparent,
+                                sheetPeekHeight = 100.dp
+                            ) {
+                            }
                         }
                     }
 
@@ -91,23 +117,39 @@ fun checkAdmin(): String {
     return if (profile.isAdmin) "Admin" else "User"
 }
 
+@OptIn(ExperimentalMotionApi::class)
 @Composable
-fun AvatarAndName(name: String, avatar: Int, type: String) {
-    Image(
-        painter = painterResource(avatar),
-        contentDescription = "Contact profile picture",
-        contentScale = ContentScale.Crop,
-        modifier = Modifier
-            .size(200.dp)
-            .clip(CircleShape)
-    )
-    Text(
-        text = name,
-        modifier = Modifier.padding(PaddingValues(top = 20.dp, bottom = 10.dp)),
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Bold
-    )
-    Text(text = type)
+fun ProfileHeader(name: String, avatar: Int, type: String, progress: Float) {
+    val context = LocalContext.current
+    val motionScene = remember {
+        context.resources
+            .openRawResource(R.raw.motion_scene)
+            .readBytes()
+            .decodeToString()
+    }
+    MotionLayout(
+        motionScene = MotionScene(content = motionScene),
+        progress = progress,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Image(
+            painter = painterResource(avatar),
+            contentDescription = "Contact profile picture",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(200.dp)
+                .clip(CircleShape)
+                .layoutId("profile_pic")
+        )
+        Text(
+            text = name,
+            modifier = Modifier.padding(PaddingValues(top = 20.dp, bottom = 10.dp))
+                .layoutId("username"),
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Text(text = type, modifier = Modifier.layoutId("type"))
+    }
 }
 
 @Composable
