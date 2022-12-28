@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">ProfileApp</string>
+    <string name="profile_type_title">Profile type</string>
+    <string name="email_title">My e-mail</string>
+    <string name="phone_title">My phone number</string>
+    <string name="gender_title">My gender</string>
+    <string name="customer_number_title">My customer number</string>
+    <string name="bottomsheet_title">More about me</string>
+    <string name="bottomsheet_subtitle">Swipe up to see more information about me</string>
 </resources>
